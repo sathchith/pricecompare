@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <title>PriceCompare India</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F1117'/%3E%3Ctext y='46' x='7' font-size='44' font-family='monospace' font-weight='900' fill='%23FF9900'%3E%E2%82%B9%3C/text%3E%3Ccircle cx='50' cy='16' r='12' fill='%234B5CF6'/%3E%3Ctext x='50' y='21' text-anchor='middle' font-size='14' font-weight='900' fill='white' font-family='monospace'%3E%E2%9C%93%3C/text%3E%3C/svg%3E"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#0F1117;font-family:'Inter','Segoe UI',sans-serif;color:#E8EAF0;min-height:100vh;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    input{outline:none;font-family:inherit;}
+    input::placeholder{color:#4B5563;}
+    a{-webkit-tap-highlight-color:transparent;}
+    .card{background:#1A1D27;border:1px solid #2A2D3A;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;animation:fadeUp 0.3s ease both;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .badge{border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700;letter-spacing:.5px;font-family:monospace;}
+    .btn-link{margin-top:4px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;text-align:center;display:block;}
+    .spinner{width:30px;height:30px;border:3px solid #2A2D3A;border-top:3px solid #4B5CF6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+    #error-box{margin-top:16px;padding:12px 16px;background:#7F1D1D22;border:1px solid #EF444433;border-radius:10px;color:#FCA5A5;font-size:13px;display:none;word-break:break-all;}
+    #loading-box{text-align:center;padding:40px 0;color:#6B7280;display:none;}
+    #results{margin-top:20px;display:none;}
+    #empty-state{text-align:center;padding:50px 0;}
+    .section-label{color:#6B7280;font-size:11px;margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase;font-weight:600;}
+    .best-deal{border-radius:12px;padding:14px 18px;margin-top:10px;display:flex;align-items:center;gap:12px;}
+    .quick-links-box{background:#1A1D27;border:1px solid #2A2D3A;border-radius:12px;padding:16px 18px;margin-top:10px;}
+    .quick-link-btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:4px;}
+    .no-results{background:#1A1D27;border:1px solid #2A2D3A;border-radius:12px;padding:16px;text-align:center;color:#6B7280;font-size:13px;}
+    #debug-box{background:#1a1200;border:1px solid #F8D030;border-radius:10px;padding:12px;margin-top:12px;color:#F8D030;font-size:11px;font-family:monospace;display:none;word-break:break-all;}
+    @media(max-width:480px){.grid2{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<div style="border-bottom:1px solid #2A2D3A;padding:18px 20px 16px;">
+  <div style="max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px;">
+    <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="64" height="64" rx="14" fill="#0F1117"/>
+      <text y="46" x="7" font-size="44" font-family="monospace" font-weight="900" fill="#FF9900">₹</text>
+      <circle cx="50" cy="16" r="12" fill="#4B5CF6"/>
+      <text x="50" y="21" text-anchor="middle" font-size="14" font-weight="900" fill="white" font-family="monospace">✓</text>
+    </svg>
+    <div>
+      <div style="font-size:18px;font-weight:900;letter-spacing:-.5px;line-height:1.2;">
+        <span style="color:#FF9900;">Price</span><span style="color:#E8EAF0;">Compare</span>
+        <span style="color:#4B5CF6;font-size:12px;font-weight:700;margin-left:8px;background:#4B5CF633;border-radius:5px;padding:2px 7px;vertical-align:middle;">India</span>
+      </div>
+      <div style="font-size:11px;color:#6B7280;margin-top:2px;">Amazon · Flipkart · Blinkit · Instamart · Zepto</div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:22px 20px 60px;max-width:640px;margin:0 auto;">
+
+  <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <input id="q" type="text" placeholder="e.g. OnePlus 12, Surf Excel 1kg…"
+      style="flex:1;background:#1A1D27;border:1px solid #2A2D3A;border-radius:10px;padding:12px 14px;color:#E8EAF0;font-size:14px;"/>
+    <button id="searchBtn" onclick="doSearch()"
+      style="background:#4B5CF6;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">
+      Compare
+    </button>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+    <input id="pin" type="tel" maxlength="6" placeholder="Pincode (optional)"
+      style="width:160px;background:#1A1D27;border:1px solid #2A2D3A;border-radius:10px;padding:10px 14px;color:#E8EAF0;font-size:13px;"/>
+    <span style="font-size:12px;color:#374151;">for Blinkit / Instamart area</span>
+  </div>
+
+  <div id="loading-box">
+    <div class="spinner"></div>
+    <div style="font-size:14px;">Searching across platforms…</div>
+    <div style="font-size:12px;margin-top:4px;color:#374151;">Fetching live prices</div>
+  </div>
+
+  <div id="error-box"></div>
+  <div id="debug-box"></div>
+
+  <div id="results">
+    <div id="results-label" class="section-label"></div>
+    <div id="amazon-section">
+      <div class="section-label" style="color:#FF990099;">🟠 Amazon India</div>
+      <div id="amazon-grid" class="grid2"></div>
+    </div>
+    <div id="flipkart-section" style="margin-top:18px;">
+      <div class="section-label" style="color:#2874F099;">🔵 Flipkart</div>
+      <div id="flipkart-grid" class="grid2"></div>
+    </div>
+    <div id="best-deal-box"></div>
+    <div id="quick-links" style="margin-top:10px;"></div>
+  </div>
+
+  <div id="empty-state">
+    <div style="font-size:40px;margin-bottom:10px;">🛒</div>
+    <div style="font-size:14px;font-weight:600;color:#4B5563;">Search for any product</div>
+    <div style="font-size:12px;margin-top:5px;color:#374151;">Electronics, groceries, appliances & more</div>
+  </div>
+</div>
+
+<script>
+// Global error catcher — shows errors on screen instead of silent blank page
+window.onerror = function(msg, src, line, col, err) {
+  var db = document.getElementById('debug-box');
+  if(db){ db.style.display='block'; db.textContent = 'JS Error: '+msg+' (line '+line+')'; }
+  return false;
+};
+window.onunhandledrejection = function(e){
+  var db = document.getElementById('debug-box');
+  if(db){ db.style.display='block'; db.textContent = 'Promise Error: '+(e.reason?.message||e.reason||'unknown'); }
+};
+
+const SERP_KEY = '71152f145ab992e9890332947c2c924dca33c65d4b62b0946f4365d3b8670dd0';
+
+function getColor(source){
+  if(!source) return '#6B7280';
+  var s = source.toLowerCase();
+  if(s.includes('amazon')) return '#FF9900';
+  if(s.includes('flipkart')) return '#2874F0';
+  return '#6B7280';
+}
+
+function parsePrice(str){
+  if(!str) return null;
+  var n = str.replace(/[^0-9.]/g,'');
+  return n ? parseFloat(n) : null;
+}
+
+function makeCard(item, delay){
+  var color = getColor(item.source);
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.style.borderTop = '3px solid '+color;
+  card.style.animationDelay = (delay||0)+'s';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:12px;color:#E8EAF0;line-height:1.4;font-weight:500;';
+  title.textContent = item.title || '';
+  card.appendChild(title);
+
+  if(item.price){
+    var price = document.createElement('div');
+    price.style.cssText = 'font-size:22px;font-weight:800;color:'+color+';font-family:monospace;';
+    price.textContent = item.price;
+    card.appendChild(price);
+  }
+
+  if(item.rating){
+    var rat = document.createElement('div');
+    rat.style.cssText = 'font-size:12px;color:#FBBF24;';
+    rat.textContent = '★ '+item.rating+(item.reviews?' ('+item.reviews+')':'');
+    card.appendChild(rat);
+  }
+
+  if(item.link){
+    var a = document.createElement('a');
+    a.href = item.link; a.target='_blank'; a.rel='noopener noreferrer';
+    a.className = 'btn-link';
+    a.style.cssText = 'background:'+color+'18;color:'+color+';border:1px solid '+color+'44;';
+    a.textContent = 'View listing →';
+    card.appendChild(a);
+  }
+  return card;
+}
+
+function makeBestDeal(amazonItems, flipkartItems){
+  var all = amazonItems.concat(flipkartItems);
+  var withPrices = all.map(function(i){ return Object.assign({},i,{num:parsePrice(i.price)}); }).filter(function(i){ return i.num; });
+  if(withPrices.length < 2) return null;
+  var best  = withPrices.reduce(function(a,b){ return a.num<b.num?a:b; });
+  var worst = withPrices.reduce(function(a,b){ return a.num>b.num?a:b; });
+  if(best.num===worst.num) return null;
+  var saving = worst.num-best.num;
+  var pct = ((saving/worst.num)*100).toFixed(0);
+  var color = getColor(best.source);
+  var label = (best.source||'').toLowerCase().includes('amazon') ? 'Amazon' : 'Flipkart';
+  var div = document.createElement('div');
+  div.className = 'best-deal';
+  div.style.cssText = 'background:'+color+'12;border:1px solid '+color+'33;margin-top:16px;';
+  div.innerHTML = '<span style="font-size:26px;">🏆</span><div><div style="color:'+color+';font-weight:700;font-size:14px;">Cheapest on '+label+' — '+best.price+'</div><div style="color:#6B7280;font-size:12px;margin-top:2px;">Up to ₹'+saving.toLocaleString('en-IN')+' ('+pct+'%) cheaper</div></div>';
+  return div;
+}
+
+function makeQuickLinks(query, pincode){
+  var encoded = encodeURIComponent(query);
+  var links = [
+    {label:'Blinkit',   color:'#F8D030', emoji:'🟡', url:'https://blinkit.com/s/?q='+encoded},
+    {label:'Instamart', color:'#FC8019', emoji:'🟠', url:'https://www.swiggy.com/instamart/search?query='+encoded},
+    {label:'Zepto',     color:'#8B5CF6', emoji:'🟣', url:'https://www.zeptonow.com/search?query='+encoded},
+  ];
+  var box = document.createElement('div');
+  box.className = 'quick-links-box';
+  var h = document.createElement('div');
+  h.style.cssText = 'font-size:12px;color:#6B7280;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;';
+  h.textContent = '⚡ Check Quick Commerce'+(pincode?' near '+pincode:'');
+  box.appendChild(h);
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+  links.forEach(function(l){
+    var a = document.createElement('a');
+    a.href=l.url; a.target='_blank'; a.rel='noopener noreferrer';
+    a.className='quick-link-btn';
+    a.style.cssText='background:'+l.color+'18;color:'+l.color+';border:1px solid '+l.color+'44;';
+    a.textContent=l.emoji+' '+l.label+' →';
+    row.appendChild(a);
+  });
+  box.appendChild(row);
+  var note = document.createElement('div');
+  note.style.cssText = 'font-size:11px;color:#374151;margin-top:10px;';
+  note.textContent = 'Quick commerce prices vary by location. Tap to check live.';
+  box.appendChild(note);
+  return box;
+}
+
+function setLoading(on){
+  document.getElementById('loading-box').style.display = on?'block':'none';
+  document.getElementById('empty-state').style.display = (on||window._hasResults)?'none':'block';
+  var btn = document.getElementById('searchBtn');
+  btn.textContent = on?'Searching…':'Compare';
+  btn.disabled = on;
+  btn.style.background = on?'#2A2D3A':'#4B5CF6';
+  btn.style.color = on?'#6B7280':'#fff';
+}
+
+function showError(msg){
+  var eb = document.getElementById('error-box');
+  eb.textContent = msg;
+  eb.style.display = 'block';
+  document.getElementById('empty-state').style.display = 'block';
+}
+
+function fetchAllResults(query){
+  var params = new URLSearchParams({
+    api_key: SERP_KEY,
+    engine: 'google_shopping',
+    q: query,
+    gl: 'in',
+    hl: 'en',
+    num: '20'
+  });
+  return fetch('https://priceproxy.sathchiths.workers.dev?'+params.toString())
+    .then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status+' from SerpAPI');
+      return res.json();
+    })
+    .then(function(data){
+      var results = data.shopping_results || [];
+      var amazon = [], flipkart = [];
+      results.forEach(function(r){
+        var src = (r.source||'').toLowerCase();
+        var item = {
+          title: r.title,
+          price: r.price,
+          rating: r.rating,
+          reviews: r.reviews,
+          link: r.link || r.product_link,
+        };
+        if(src.includes('amazon')){ item.source='Amazon'; amazon.push(item); }
+        else if(src.includes('flipkart')){ item.source='Flipkart'; flipkart.push(item); }
+      });
+      // fallback: if none matched by source, try by link
+      if(amazon.length===0 && flipkart.length===0){
+        results.forEach(function(r){
+          var lnk = (r.link||r.product_link||'').toLowerCase();
+          var item = { title:r.title, price:r.price, rating:r.rating, reviews:r.reviews, link:r.link||r.product_link };
+          if(lnk.includes('amazon.in')){ item.source='Amazon'; amazon.push(item); }
+          else if(lnk.includes('flipkart')){ item.source='Flipkart'; flipkart.push(item); }
+        });
+      }
+      return { amazon: amazon.slice(0,4), flipkart: flipkart.slice(0,4), all: results };
+    });
+}
+
+document.getElementById('q').addEventListener('keydown', function(e){ if(e.key==='Enter') doSearch(); });
+document.getElementById('pin').addEventListener('input', function(e){ e.target.value=e.target.value.replace(/\D/g,'').slice(0,6); });
+
+function doSearch(){
+  var query = document.getElementById('q').value.trim();
+  var pincode = document.getElementById('pin').value.trim();
+  if(!query) return;
+
+  setLoading(true);
+  document.getElementById('results').style.display='none';
+  document.getElementById('error-box').style.display='none';
+  document.getElementById('debug-box').style.display='none';
+  window._hasResults = false;
+
+  fetchAllResults(query).then(function(results){
+    var amazonItems   = results.amazon;
+    var flipkartItems = results.flipkart;
+
+    var aGrid = document.getElementById('amazon-grid');
+    aGrid.innerHTML = '';
+    if(amazonItems.length){
+      amazonItems.forEach(function(item,i){ aGrid.appendChild(makeCard(item,i*0.05)); });
+    } else {
+      var nf=document.createElement('div'); nf.className='no-results'; nf.textContent='No Amazon listings found'; aGrid.appendChild(nf);
+    }
+
+    var fGrid = document.getElementById('flipkart-grid');
+    fGrid.innerHTML = '';
+    if(flipkartItems.length){
+      flipkartItems.forEach(function(item,i){ fGrid.appendChild(makeCard(item,i*0.05)); });
+    } else {
+      var nf2=document.createElement('div'); nf2.className='no-results'; nf2.textContent='No Flipkart listings found'; fGrid.appendChild(nf2);
+    }
+
+    var bd = document.getElementById('best-deal-box');
+    bd.innerHTML = '';
+    var bestEl = makeBestDeal(amazonItems, flipkartItems);
+    if(bestEl) bd.appendChild(bestEl);
+
+    var ql = document.getElementById('quick-links');
+    ql.innerHTML = '';
+    ql.appendChild(makeQuickLinks(query, pincode));
+
+    document.getElementById('results-label').textContent = 'Results for "'+query+'"';
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('empty-state').style.display = 'none';
+    window._hasResults = true;
+
+  }).catch(function(err){
+    showError('Something went wrong: '+err.message);
+  }).finally(function(){
+    setLoading(false);
+  });
+}
+</script>
+</body>
+</html>
